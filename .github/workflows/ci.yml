@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.9", "3.10", "3.11"]
+        python-version: ["3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v3
       #----------------------------------------------
@@ -50,10 +50,10 @@ jobs:
       #----------------------------------------------
       - name: Black check
         run: |
-          poetry run black src/ --check
+          poetry run black clientele/ --check
       - name: Ruff check
         run: |
-          poetry run ruff src/
+          poetry run ruff clientele/
       - name: Test with pytest
         run: |
           poetry run pytest -vv

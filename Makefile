@@ -16,7 +16,7 @@ release:  ## Build a new version and release it
 	poetry publish
 
 mypy: ## Run a static syntax check
-	poetry run mypy src/
+	poetry run mypy .
 
 lint: ## Format the code correctly
 	poetry run black .
@@ -37,3 +37,8 @@ test:  ## Run tests
 
 shell:  ## Run an ipython shell
 	poetry run ipython
+
+generate-test-clients:  ## regenerate the test clients in the tests/ directory
+	poetry install
+	clientele generate -f example_openapi_specs/best.json -o tests/test_client/ --regen t
+	clientele generate -f example_openapi_specs/best.json -o tests/async_test_client/ --asyncio t --regen t

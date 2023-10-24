@@ -1,7 +1,10 @@
-import typing  # noqa
-import pydantic  # noqa
-from enum import Enum  # noqa
+from __future__ import annotations
+
 import inspect  # noqa
+import typing  # noqa
+from enum import Enum  # noqa
+
+import pydantic  # noqa
 
 
 class AnotherModel(pydantic.BaseModel):
@@ -64,6 +67,10 @@ class SecurityRequiredResponse(pydantic.BaseModel):
 
 
 class SimpleQueryParametersResponse(pydantic.BaseModel):
+    your_query: str
+
+
+class OptionalQueryParametersResponse(pydantic.BaseModel):
     your_query: str
 
 

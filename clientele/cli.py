@@ -4,7 +4,8 @@ import click
 @click.group()
 def cli_group():
     """
-    Clientele:  Loveable API Clients from OpenAPI schemas
+    Clientele:  Generate loveable Python HTTP API Clients
+    https://github.com/phalt/clientele
     """
 
 
@@ -13,7 +14,7 @@ def version():
     """
     Print the current version of clientele
     """
-    from src.settings import VERSION
+    from clientele.settings import VERSION
 
     print(f"clientele {VERSION}")
 
@@ -49,7 +50,7 @@ def validate(url, file):
         with open(file, "r") as f:
             Spec.from_file(f)
     console.log(
-        f"Found API specification for {spec['info']['title']} | version {spec['info']['version']}"
+        f"Found API specification: {spec['info']['title']} | version {spec['info']['version']}"
     )
     major, _, _ = spec["openapi"].split(".")
     if int(major) < 3:
@@ -61,13 +62,16 @@ def validate(url, file):
 
 
 @click.command()
-@click.option("-u", "--url", help="URL to openapi schema (json file)", required=False)
-@click.option("-f", "--file", help="Path to openapi schema (json file)", required=False)
+@click.option("-u", "--url", help="URL to openapi schema (URL)", required=False)
+@click.option(
+    "-f", "--file", help="Path to openapi schema (json or yaml file)", required=False
+)
 @click.option(
     "-o", "--output", help="Directory for the generated client", required=True
 )
-@click.option("-a", "--asyncio", help="Use Async.IO", required=False)
-def generate(url, file, output, asyncio):
+@click.option("-a", "--asyncio", help="Generate async client", required=False)
+@click.option("-r", "--regen", help="Regenerate client", required=False)
+def generate(url, file, output, asyncio, regen):
     """
     Generate a new client from an OpenAPI schema
     """
@@ -80,7 +84,7 @@ def generate(url, file, output, asyncio):
 
     console = Console()
 
-    from src.generator import Generator
+    from clientele.generators.standard.generator import StandardGenerator
 
     assert url or file, "Must pass either a URL or a file"
 
@@ -97,7 +101,7 @@ def generate(url, file, output, asyncio):
         with open(file, "r") as f:
             spec = Spec.from_file(f)
     console.log(
-        f"Found API specification for {spec['info']['title']} | version {spec['info']['version']}"
+        f"Found API specification: {spec['info']['title']} | version {spec['info']['version']}"
     )
     major, _, _ = spec["openapi"].split(".")
     if int(major) < 3:
@@ -105,12 +109,40 @@ def generate(url, file, output, asyncio):
             f"[red]Clientele only supports OpenAPI version 3.0.0 and up, and you have {spec['openapi']}"
         )
         return
-    Generator(
-        spec=spec, asyncio=asyncio, output_dir=output, url=url, file=file
-    ).generate()
+    generator = StandardGenerator(
+        spec=spec, asyncio=asyncio, regen=regen, output_dir=output, url=url, file=file
+    )
+    if generator.prevent_accidental_regens():
+        generator.generate()
+        console.log("\n[green]⚜️ Client generated! ⚜️ \n")
+        console.log(
+            "[yellow]REMEMBER: install `httpx` `pydantic`, and `respx` to use your new client"
+        )
+
+
+@click.command()
+@click.option(
+    "-o", "--output", help="Directory for the generated client", required=True
+)
+def generate_basic(output):
+    """
+    Generate a "basic" file structure, no code.
+    """
+    from rich.console import Console
+
+    from clientele.generators.basic.generator import BasicGenerator
+
+    console = Console()
+
+    console.log(f"Generating basic client at {output}...")
+
+    generator = BasicGenerator(output_dir=output)
+
+    generator.generate()
 
 
 cli_group.add_command(generate)
+cli_group.add_command(generate_basic)
 cli_group.add_command(version)
 cli_group.add_command(validate)
 

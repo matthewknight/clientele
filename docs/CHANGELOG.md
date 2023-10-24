@@ -1,5 +1,47 @@
 # Change log
 
+## 0.7.0
+
+* Updated all files to use the templates engine.
+* Generator files have been reorganised in clientele to support future templates.
+* `constants.py` has been renamed to `config.py` to better reflect how it is used. It is not generated from a template like the other files.
+* If you are using Python 3.10 or later, the `typing.Unions` types will generate as the short hand `|` instead.
+* To regenerate a client (and to prevent accidental overrides) you must now pass `--regen t` or `-r t` to the `generate` command. This is automatically added to the line in `MANIFEST.md` to  help.
+* Clientele will now automatically run [black](https://black.readthedocs.io/en/stable/) code formatter once a client is generated or regenerated.
+* Clientele will now generate absolute paths to refer to adjacent files in the generated client, instead of relative paths. This assumes you are running the `clientele` command in the root directory of your project.
+* A lot of documentation and docs strings updates so that code in the generated client is easier to understand.
+* Improved the utility for snake-casing enum keys. Tests added for the functions.
+* Python 3.12 support.
+* Add a "basic" client using the command `generate-basic`. This can be used to keep a consistent file structure for an API that does not use OpenAPI.
+
+## 0.6.3
+
+* Packaged application installs in the correct location. Resolving [#6](https://github.com/phalt/clientele/issues/6)
+* Updated pyproject.toml to include a better selection of links.
+
+## 0.6.2
+
+* Ignore optional URL query parameters if they are `None`.
+
+## 0.6.1
+
+* Added `from __future__ import annotations` in files to help with typing evaluation.
+* Update to use pydantic 2.4.
+* A bunch of documentation and readme updates.
+* Small wording and grammar fixes.
+
+## 0.6.0
+
+* Significantly improved handling for response schemas. Responses from API endpoints now look at the HTTP status code to pick the correct response schema to generate from the HTTP json data. When regenerating, you will notice a bit more logic generated in the `http.py` file to handle this.
+* Significantly improved coverage of exceptions raised when trying to generate response schemas.
+* Response types for a class are now sorted.
+* Fixed a bug where `put` methods did not generate input data correctly.
+
+## 0.5.2
+
+* Fix pathing for `constants.py` - thanks to @matthewknight for the contribution!
+* Added `CONTRIBUTORS.md`
+
 ## 0.5.1
 
 * Support for HTTP PUT methods

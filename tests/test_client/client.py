@@ -1,6 +1,8 @@
+from __future__ import annotations
+
 import typing  # noqa
-from . import schemas  # noqa
-from . import http  # noqa
+
+from tests.test_client import http, schemas  # noqa
 
 
 def complex_model_request_complex_model_request_get() -> schemas.ComplexModelResponse:
@@ -14,7 +16,7 @@ def complex_model_request_complex_model_request_get() -> schemas.ComplexModelRes
 
 def header_request_header_request_get(
     headers: typing.Optional[schemas.HeaderRequestHeaderRequestGetHeaders],
-) -> typing.Union[schemas.HTTPValidationError, schemas.HeadersResponse]:
+) -> schemas.HTTPValidationError | schemas.HeadersResponse:
     """Header Request"""
     headers_dict = (
         headers and headers.model_dump(by_alias=True, exclude_unset=True) or None
@@ -36,7 +38,7 @@ def optional_parameters_request_optional_parameters_get() -> (
 
 def request_data_request_data_post(
     data: schemas.RequestDataRequest,
-) -> typing.Union[schemas.RequestDataResponse, schemas.HTTPValidationError]:
+) -> schemas.HTTPValidationError | schemas.RequestDataResponse:
     """Request Data"""
 
     response = http.post(url="/request-data", data=data.model_dump())
@@ -44,8 +46,8 @@ def request_data_request_data_post(
 
 
 def request_data_request_data_put(
-    data: None,
-) -> typing.Union[schemas.RequestDataResponse, schemas.HTTPValidationError]:
+    data: schemas.RequestDataRequest,
+) -> schemas.HTTPValidationError | schemas.RequestDataResponse:
     """Request Data"""
 
     response = http.put(url="/request-data", data=data.model_dump())
@@ -54,7 +56,7 @@ def request_data_request_data_put(
 
 def request_data_path_request_data(
     path_parameter: str, data: schemas.RequestDataRequest
-) -> typing.Union[schemas.RequestDataAndParameterResponse, schemas.HTTPValidationError]:
+) -> schemas.HTTPValidationError | schemas.RequestDataAndParameterResponse:
     """Request Data Path"""
 
     response = http.post(url=f"/request-data/{path_parameter}", data=data.model_dump())
@@ -81,11 +83,20 @@ def security_required_request_security_required_get() -> (
 
 def query_request_simple_query_get(
     your_input: str,
-) -> typing.Union[schemas.SimpleQueryParametersResponse, schemas.HTTPValidationError]:
+) -> schemas.HTTPValidationError | schemas.SimpleQueryParametersResponse:
     """Query Request"""
 
     response = http.get(url=f"/simple-query?your_input={your_input}")
     return http.handle_response(query_request_simple_query_get, response)
+
+
+def query_request_optional_query_get(
+    your_input: typing.Optional[str],
+) -> schemas.HTTPValidationError | schemas.OptionalQueryParametersResponse:
+    """Optional Query Request"""
+
+    response = http.get(url=f"/optional-query?your_input={your_input}")
+    return http.handle_response(query_request_optional_query_get, response)
 
 
 def simple_request_simple_request_get() -> schemas.SimpleResponse:
@@ -97,7 +108,7 @@ def simple_request_simple_request_get() -> schemas.SimpleResponse:
 
 def parameter_request_simple_request(
     your_input: str,
-) -> typing.Union[schemas.ParameterResponse, schemas.HTTPValidationError]:
+) -> schemas.HTTPValidationError | schemas.ParameterResponse:
     """Parameter Request"""
 
     response = http.get(url=f"/simple-request/{your_input}")

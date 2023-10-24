@@ -4,9 +4,9 @@ import pytest
 from httpx import Response
 from respx import MockRouter
 
-from .test_client import client, constants, http, schemas
+from .test_client import client, config, http, schemas
 
-BASE_URL = constants.api_base_url()
+BASE_URL = config.api_base_url()
 
 
 @pytest.mark.respx(base_url=BASE_URL)
@@ -40,6 +40,7 @@ def test_simple_request_simple_request_get_raises_exception(respx_mock: MockRout
     assert isinstance(raised_exception.value, http.APIException)
     # Make sure we have the response on the exception
     assert raised_exception.value.response.status_code == 404
+    assert raised_exception.value.reason == "An unexpected status code was received"
     assert len(respx_mock.calls) == 1
     call = respx_mock.calls[0]
     assert call.request.url == BASE_URL + mock_path
@@ -85,7 +86,7 @@ def test_query_request_simple_query_get(respx_mock: MockRouter):
     # Given
     your_input = "hello world"
     mocked_response = {"your_query": your_input}
-    mock_path = f"/simple-query?your_input={your_input}"
+    mock_path = "/simple-query?your_input=hello+world"
     respx_mock.get(mock_path).mock(
         return_value=Response(json=mocked_response, status_code=200)
     )
@@ -93,6 +94,25 @@ def test_query_request_simple_query_get(respx_mock: MockRouter):
     response = client.query_request_simple_query_get(your_input=your_input)
     # Then
     assert isinstance(response, schemas.SimpleQueryParametersResponse)
+    assert len(respx_mock.calls) == 1
+    call = respx_mock.calls[0]
+    assert call.request.url == BASE_URL + mock_path
+
+
+@pytest.mark.respx(base_url=BASE_URL)
+def test_query_request_optional_query_get(respx_mock: MockRouter):
+    # Given
+    your_input = None
+    mocked_response = {"your_query": "test"}
+    # NOTE: omits None query parameter
+    mock_path = "/optional-query"
+    respx_mock.get(mock_path).mock(
+        return_value=Response(json=mocked_response, status_code=200)
+    )
+    # When
+    response = client.query_request_optional_query_get(your_input=your_input)
+    # Then
+    assert isinstance(response, schemas.OptionalQueryParametersResponse)
     assert len(respx_mock.calls) == 1
     call = respx_mock.calls[0]
     assert call.request.url == BASE_URL + mock_path
